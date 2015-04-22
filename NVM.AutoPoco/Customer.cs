@@ -6,20 +6,16 @@ namespace NVM.AutoPoco
     {
         #region Fields
 
-        private string _password;
+        public string Password { get; private set; }
 
         #endregion
 
         #region Methods
 
-        public bool IsPassword(string password)
-        {
-            return _password == password;
-        }
 
         public void SetPassword(string password)
         {
-            _password = password;
+            Password = password;
         }
 
         #endregion

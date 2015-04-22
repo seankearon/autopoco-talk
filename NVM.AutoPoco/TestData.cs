@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using AutoPoco;
+using AutoPoco.Contrib.DataSources;
 using AutoPoco.DataSources;
 using AutoPoco.Engine;
 
@@ -18,8 +20,9 @@ namespace NVM.AutoPoco
 
                 x.Include<Customer>()
                     .Setup(c => c.Id).Use<IntegerIdSource>()
-                    .Setup(c => c.FirstName).Use<FirstNameSource>()
-                    .Setup(c => c.LastName).Use<LastNameSource>()
+                    .Setup(c => c.Name).Use<FullNameSource>()
+                    .Setup(c => c.Address).Use<AddressSource>()
+                    .Setup(c => c.DateOfBirth).Use<DateOfBirthSource>()
                     ;
 
             });
@@ -33,25 +36,36 @@ namespace NVM.AutoPoco
         {
             get
             {
-                return Session.List<Customer>(2).Get().ToArray();
-                /*
-                                return new[]
-                                {
-                                    new Customer
-                                    {
-                                        Id = 1,
-                                        FirstName = "Sean",
-                                        LastName = "Kearon"
-                                    },
-                                    new Customer
-                                    {
-                                        Id = 2,
-                                        FirstName = "Gillian",
-                                        LastName = "Macdonald"
-                                    }
-                                };
-                */
+                return Session.List<Customer>(200).Get().ToArray();
             }
+        }
+    }
+
+    public class FullNameSource : DatasourceBase<string>
+    {
+        readonly FirstNameSource _firstNameSource = new FirstNameSource();
+        readonly LastNameSource _lastNameSource = new LastNameSource();
+
+        public override string Next(IGenerationContext context)
+        {
+            return _firstNameSource.Next(context) + " " + _lastNameSource.Next(context);
+        }
+    }
+
+    public class AddressSource : IDatasource<string>
+    {
+        readonly UKStreetAddressSource _streets = new UKStreetAddressSource();
+        readonly UKCitySource _cities = new UKCitySource();
+        readonly UKCountySource _counties = new UKCountySource();
+        readonly UKPostcodeSource _postcodes = new UKPostcodeSource();
+
+        public object Next(IGenerationContext context)
+        {
+            return string.Join(Environment.NewLine,
+                _streets.Next(context),
+                _cities.Next(context),
+                _counties.Next(context),
+                _postcodes.Next(context));
         }
     }
 }

@@ -34,6 +34,15 @@ namespace NVM.AutoPoco
         public string EmailAddress { get; set; }
         public string Telephone { get; set; }
 
+        public Order[] Orders { get; set; }
+
         #endregion
+    }
+
+    public class Order
+    {
+        public string Number { get; set; }
+        public string Product { get; set; }
+        public decimal Total { get; set; }
     }
 }
